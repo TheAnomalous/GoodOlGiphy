@@ -65,20 +65,26 @@
     <div id="gifResults"></div>
 
     <script>
-        // Giphy API key
-        const apiKey = 'EYe8hlZaneUc9DsLMwUAU2sSlMg3w5gH'; // Your Giphy API Key
+        // Use an endpoint that fetches the API key securely from the backend
+        async function getApiKey() {
+            // Fetch the API key from your backend or GitHub Secrets via a secure endpoint
+            const response = await fetch('/get-api-key');
+            const data = await response.json();
+            return data.apiKey;
+        }
 
         // Search form submission
-        document.getElementById('searchForm').addEventListener('submit', function(event) {
+        document.getElementById('searchForm').addEventListener('submit', async function(event) {
             event.preventDefault();
             const query = document.getElementById('searchInput').value;
             if (query) {
-                searchGiphy(query);
+                const apiKey = await getApiKey(); // Fetch API key securely
+                searchGiphy(query, apiKey);
             }
         });
 
         // Fetch GIFs from Giphy API
-        function searchGiphy(query) {
+        function searchGiphy(query, apiKey) {
             const url = `https://api.giphy.com/v1/gifs/search?api_key=${apiKey}&q=${encodeURIComponent(query)}&limit=12&offset=0&rating=g&lang=en`;
             
             fetch(url)
