@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giphy GIF Inserter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 10px;
+            background-color: #f4f4f9;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        #searchForm {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        #searchInput {
+            padding: 10px;
+            width: 80%;
+            max-width: 400px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        #searchButton {
+            padding: 10px 20px;
+            background-color: #0078D4;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #searchButton:hover {
+            background-color: #005A9E;
+        }
+        #gifResults {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            grid-gap: 10px;
+        }
+        .gifItem {
+            text-align: center;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 5px;
+            background-color: white;
+        }
+        .gifItem img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Giphy GIF Inserter</h1>
+    <form id="searchForm">
+        <input type="text" id="searchInput" placeholder="Search for GIFs...">
+        <button type="submit" id="searchButton">Search</button>
+    </form>
+    <div id="gifResults"></div>
+
+    <script>
+        // Giphy API key
+        const apiKey = 'EYe8hlZaneUc9DsLMwUAU2sSlMg3w5gH'; // Your Giphy API Key
+
+        // Search form submission
+        document.getElementById('searchForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const query = document.getElementById('searchInput').value;
+            if (query) {
+                searchGiphy(query);
+            }
+        });
+
+        // Fetch GIFs from Giphy API
+        function searchGiphy(query) {
+            const url = `https://api.giphy.com/v1/gifs/search?api_key=${apiKey}&q=${encodeURIComponent(query)}&limit=12&offset=0&rating=g&lang=en`;
+            
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    displayGifs(data.data);
+                })
+                .catch(error => console.error('Error fetching GIFs:', error));
+        }
+
+        // Display GIF results in the task pane
+        function displayGifs(gifs) {
+            const gifResults = document.getElementById('gifResults');
+            gifResults.innerHTML = ''; // Clear previous results
+
+            gifs.forEach(gif => {
+                const gifUrl = gif.images.fixed_height.url;
+                const gifItem = document.createElement('div');
+                gifItem.className = 'gifItem';
+                gifItem.innerHTML = `<img src="${gifUrl}" alt="GIF">`;
+                
+                gifItem.addEventListener('click', () => {
+                    insertGifIntoEmail(gifUrl);
+                });
+
+                gifResults.appendChild(gifItem);
+            });
+        }
+
+        // Insert the selected GIF into the email
+        function insertGifIntoEmail(gifUrl) {
+            // Office JS API to insert the selected GIF in the email body
+            Office.context.mailbox.item.body.setSelectedDataAsync(
+                `<img src="${gifUrl}" alt="GIF" style="max-width:100%;">`, 
+                { coercionType: Office.CoercionType.Html },
+                function (result) {
+                    if (result.status === Office.AsyncResultStatus.Failed) {
+                        console.error('Failed to insert GIF:', result.error.message);
+                    }
+                }
+            );
+        }
+
+        // Initialize Office JS
+        Office.initialize = function () {
+            console.log('Office initialized');
+        };
+    </script>
+</body>
+</html>
