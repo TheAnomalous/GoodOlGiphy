@@ -55,6 +55,9 @@
             border-radius: 5px;
         }
     </style>
+
+    <!-- Office.js Library -->
+    <script src="https://appsforoffice.microsoft.com/lib/1.1/hosted/office.js"></script>
 </head>
 <body>
     <h1>Giphy GIF Inserter</h1>
@@ -65,8 +68,7 @@
     <div id="gifResults"></div>
 
     <script>
-        // Giphy API key
-        const apiKey = 'EYe8hlZaneUc9DsLMwUAU2sSlMg3w5gH'; // Your Giphy API Key
+        const apiKey = 'EYe8hlZaneUc9DsLMwUAU2sSlMg3w5gH'; // Replace with your actual Giphy API key
 
         // Search form submission
         document.getElementById('searchForm').addEventListener('submit', function(event) {
@@ -80,7 +82,7 @@
         // Fetch GIFs from Giphy API
         function searchGiphy(query) {
             const url = `https://api.giphy.com/v1/gifs/search?api_key=${apiKey}&q=${encodeURIComponent(query)}&limit=12&offset=0&rating=g&lang=en`;
-            
+
             fetch(url)
                 .then(response => response.json())
                 .then(data => {
@@ -99,9 +101,9 @@
                 const gifItem = document.createElement('div');
                 gifItem.className = 'gifItem';
                 gifItem.innerHTML = `<img src="${gifUrl}" alt="GIF">`;
-                
+
                 gifItem.addEventListener('click', () => {
-                    insertGifIntoEmail(gifUrl);
+                    insertGifIntoEmail(gifUrl); // Insert GIF into the email on click
                 });
 
                 gifResults.appendChild(gifItem);
@@ -110,21 +112,24 @@
 
         // Insert the selected GIF into the email
         function insertGifIntoEmail(gifUrl) {
-            // Office JS API to insert the selected GIF in the email body
-            Office.context.mailbox.item.body.setSelectedDataAsync(
-                `<img src="${gifUrl}" alt="GIF" style="max-width:100%;">`, 
-                { coercionType: Office.CoercionType.Html },
-                function (result) {
-                    if (result.status === Office.AsyncResultStatus.Failed) {
-                        console.error('Failed to insert GIF:', result.error.message);
+            if (Office.context.mailbox.item) {
+                Office.context.mailbox.item.body.setSelectedDataAsync(
+                    `<img src="${gifUrl}" alt="GIF" style="max-width:100%;">`,
+                    { coercionType: Office.CoercionType.Html },
+                    function (result) {
+                        if (result.status === Office.AsyncResultStatus.Failed) {
+                            console.error('Failed to insert GIF:', result.error.message);
+                        }
                     }
-                }
-            );
+                );
+            } else {
+                console.error('Office.js is not available.');
+            }
         }
 
         // Initialize Office JS
         Office.initialize = function () {
-            console.log('Office initialized');
+            console.log('Office.js initialized');
         };
     </script>
 </body>
