@@ -65,10 +65,9 @@
     <div id="gifResults"></div>
 
     <script>
-        // Use an endpoint that fetches the API key securely from the backend
+        // Fetch API key securely from the backend
         async function getApiKey() {
-            // Fetch the API key from your backend or GitHub Secrets via a secure endpoint
-            const response = await fetch('/get-api-key');
+            const response = await fetch('/get-api-key'); // Replace with your backend endpoint URL
             const data = await response.json();
             return data.apiKey;
         }
@@ -78,7 +77,7 @@
             event.preventDefault();
             const query = document.getElementById('searchInput').value;
             if (query) {
-                const apiKey = await getApiKey(); // Fetch API key securely
+                const apiKey = await getApiKey(); // Fetch the API key from the backend
                 searchGiphy(query, apiKey);
             }
         });
