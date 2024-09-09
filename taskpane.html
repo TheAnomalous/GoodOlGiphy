@@ -82,7 +82,7 @@
 
         // Fetch GIFs from Giphy API
         function searchGiphy(query) {
-            const url = `https://api.giphy.com/v1/gifs/search?api_key=${apiKey}&q=${encodeURIComponent(query)}&limit=12&offset=0&rating=g&lang=en`;
+            const url = `https://api.giphy.com/v1/gifs/search?api_key=${apiKey}&q=${encodeURIComponent(query)}&limit=100&offset=0&rating=g&lang=en`;
 
             fetch(url)
                 .then(response => response.json())
