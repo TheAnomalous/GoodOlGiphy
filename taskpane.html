@@ -1,186 +1,187 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://appsforoffice.microsoft.com/lib/1.1/hosted/office.js"></script>
-  <title>Giphy GIF Inserter</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 10px;
-      background-color: #f4f4f9;
-    }
-    h1 {
-      text-align: center;
-      color: #333;
-    }
-    #searchForm {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    #searchInput {
-      padding: 10px;
-      width: 80%;
-      max-width: 400px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
-    #searchButton {
-      padding: 10px 20px;
-      background-color: #0078D4;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    #searchButton:hover {
-      background-color: #005A9E;
-    }
-    #gifResults {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-      grid-gap: 10px;
-    }
-    .gifItem {
-      text-align: center;
-      cursor: pointer;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      padding: 5px;
-      background-color: white;
-    }
-    .gifItem img {
-      max-width: 100%;
-      height: auto;
-      border-radius: 5px;
-    }
-    #pagination {
-      display: flex;
-      justify-content: center;
-      margin-top: 10px;
-      margin-bottom: 20px;
-    }
-    #pagination button {
-      padding: 5px 10px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      margin: 5px;
-      cursor: pointer;
-      position: relative;
-      top: -10px; /* Adjust this value to control overlap */
-    }
-    #nextPageButton {
-      text-align: center;
-      margin-top: 10px;
-    }
-  </style>
-  <script src="https://appsforoffice.microsoft.com/lib/1.1/hosted/office.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giphy GIF Inserter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 10px;
+            background-color: #f4f4f9;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        #searchForm {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        #searchInput {
+            padding: 10px;
+            width: 80%;
+            max-width: 400px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        #searchButton {
+            padding: 10px 20px;
+            background-color: #0078D4;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #searchButton:hover {
+            background-color: #005A9E;
+        }
+        #gifResults {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            grid-gap: 10px;
+        }
+        .gifItem {
+            text-align: center;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 5px;
+            background-color: white;
+        }
+        .gifItem img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 5px;
+        }
+        #paginationButtons {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .pagination-btn {
+            padding: 10px 20px;
+            background-color: #0078D4;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 0 10px;
+        }
+        .pagination-btn:hover {
+            background-color: #005A9E;
+        }
+    </style>
+
+    <!-- Office.js Library -->
+    <script src="https://appsforoffice.microsoft.com/lib/1.1/hosted/office.js"></script>
 </head>
 <body>
-  <h1>Giphy GIF Inserter</h1>
-  <form id="searchForm">
-    <input type="text" id="searchInput" placeholder="Search for GIFs...">
-    <button type="submit" id="searchButton">Search</button>
-  </form>
-  <div id="gifResults"></div>
-  <div id="pagination"></div>
-  <div id="nextPageButton"></div>
+    <h1>Giphy GIF Inserter</h1>
+    <form id="searchForm">
+        <input type="text" id="searchInput" placeholder="Search for GIFs...">
+        <button type="submit" id="searchButton">Search</button>
+    </form>
+    <div id="gifResults"></div>
 
-  <script>
-    const apiKey = 'EYe8hlZaneUc9DsLMwUAU2sSlMg3w5gH'; // Replace with your actual Giphy API key
-    const gifsPerPage = 25; // Adjust the number of GIFs per page as needed
-    let currentPage = 1;
+    <div id="paginationButtons">
+        <button id="prevButton" class="pagination-btn" disabled>Previous</button>
+        <button id="nextButton" class="pagination-btn">Next</button>
+    </div>
 
-    // Search form submission
-    document.getElementById('searchForm').addEventListener('submit', function(event) {
-      event.preventDefault();
-      const query = document.getElementById('searchInput').value;
-      if (query) {
-        searchGiphy(query, currentPage);
-      }
-    });
+    <script>
+        const apiKey = 'EYe8hlZaneUc9DsLMwUAU2sSlMg3w5gH'; // Replace with your actual Giphy API key
+        let offset = 0; // For pagination
+        const limit = 12; // Number of GIFs per page
 
-    // Fetch GIFs from Giphy API
-    function searchGiphy(query, page) {
-      const url = `https://api.giphy.com/v1/gifs/search?api_key=${apiKey}&q=${encodeURIComponent(query)}&limit=${gifsPerPage}&offset=${(page - 1) * gifsPerPage}&rating=g&lang=en`;
-
-      fetch(url)
-        .then(response => response.json())
-        .then(data => {
-          displayGifs(data.data, page);
-          updatePagination(data.pagination.total_count);
-        })
-        .catch(error => console.error('Error fetching GIFs:', error));
-    }
-
-    // Display GIF results in the task pane
-    function displayGifs(gifs, page) {
-      const gifResults = document.getElementById('gifResults');
-      gifResults.innerHTML = ''; // Clear previous results
-
-      gifs.forEach(gif => {
-        const gifUrl = gif.images.fixed_height.url;
-        const gifItem = document.createElement('div');
-        gifItem.className = 'gifItem';
-        gifItem.innerHTML = `<img src="${gifUrl}" alt="GIF">`;
-
-        gifItem.addEventListener('click', () => {
-          insertGifIntoEmail(gifUrl); // Insert GIF into the email on click
+        // Search form submission
+        document.getElementById('searchForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const query = document.getElementById('searchInput').value;
+            if (query) {
+                offset = 0; // Reset pagination when a new search is performed
+                searchGiphy(query);
+            }
         });
 
-        gifResults.appendChild(gifItem);
-      });
+        // Fetch GIFs from Giphy API
+        function searchGiphy(query) {
+            const url = `https://api.giphy.com/v1/gifs/search?api_key=${apiKey}&q=${encodeURIComponent(query)}&limit=${limit}&offset=${offset}&rating=g&lang=en`;
 
-      // Add a "Next Page" button if there are more pages
-      if (page < Math.ceil(gifs.length / gifsPerPage)) {
-        const nextPageButton = document.createElement('button');
-        nextPageButton.textContent = 'Next Page';
-        nextPageButton.addEventListener('click', () => {
-          currentPage++;
-          searchGiphy(document.getElementById('searchInput').value, currentPage);
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    displayGifs(data.data);
+                    updatePaginationButtons(data.pagination);
+                })
+                .catch(error => console.error('Error fetching GIFs:', error));
+        }
+
+        // Display GIF results in the task pane
+        function displayGifs(gifs) {
+            const gifResults = document.getElementById('gifResults');
+            gifResults.innerHTML = ''; // Clear previous results
+
+            gifs.forEach(gif => {
+                const gifUrl = gif.images.fixed_height.url;
+                const gifItem = document.createElement('div');
+                gifItem.className = 'gifItem';
+                gifItem.innerHTML = `<img src="${gifUrl}" alt="GIF">`;
+
+                gifItem.addEventListener('click', () => {
+                    insertGifIntoEmail(gifUrl); // Insert GIF into the email on click
+                });
+
+                gifResults.appendChild(gifItem);
+            });
+        }
+
+        // Insert the selected GIF into the email
+        function insertGifIntoEmail(gifUrl) {
+            if (Office.context.mailbox.item) {
+                Office.context.mailbox.item.body.setSelectedDataAsync(
+                    `<img src="${gifUrl}" alt="GIF" style="max-width:100%;">`,
+                    { coercionType: Office.CoercionType.Html },
+                    function (result) {
+                        if (result.status === Office.AsyncResultStatus.Failed) {
+                            console.error('Failed to insert GIF:', result.error.message);
+                        }
+                    }
+                );
+            } else {
+                console.error('Office.js is not available.');
+            }
+        }
+
+        // Pagination: Update buttons based on Giphy API pagination metadata
+        function updatePaginationButtons(pagination) {
+            const prevButton = document.getElementById('prevButton');
+            const nextButton = document.getElementById('nextButton');
+
+            // Disable the "Previous" button if there are no more previous GIFs
+            prevButton.disabled = offset === 0;
+
+            // Disable the "Next" button if we've reached the end of available results
+            nextButton.disabled = (pagination.offset + limit) >= pagination.total_count;
+        }
+
+        // Add event listeners for pagination buttons
+        document.getElementById('prevButton').addEventListener('click', () => {
+            if (offset >= limit) {
+                offset -= limit;
+                searchGiphy(document.getElementById('searchInput').value);
+            }
         });
-        document.getElementById('nextPageButton').appendChild(nextPageButton);
-      } else {
-        document.getElementById('nextPageButton').innerHTML = '';
-      }
-    }
 
-    // Update pagination buttons
-    function updatePagination(totalCount) {
-      const totalPages = Math.ceil(totalCount / gifsPerPage);
-
-      // Clear existing pagination buttons
-      const paginationContainer = document.getElementById('pagination');
-      paginationContainer.innerHTML = '';
-
-      // Create previous button
-      if (currentPage > 1) {
-        const prevButton = document.createElement('button');
-        prevButton.textContent = 'Previous';
-        prevButton.addEventListener('click', () => {
-          currentPage--;
-          searchGiphy(document.getElementById('searchInput').value, currentPage);
+        document.getElementById('nextButton').addEventListener('click', () => {
+            offset += limit;
+            searchGiphy(document.getElementById('searchInput').value);
         });
-        paginationContainer.appendChild(prevButton);
-      }
 
-      // Create next button
-      if (currentPage < totalPages) {
-        const nextButton = document.createElement('button');
-        nextButton.textContent = 'Next';
-        nextButton.addEventListener('click', () => {
-          currentPage++;
-          searchGiphy(document.getElementById('searchInput').value, currentPage);
-        });
-        paginationContainer.appendChild(nextButton);
-      }
-    }
-
-    // Initialize Office JS
-    Office.initialize = function () {
-      console.log('Office.js initialized');
-    };
-  </script>
+        // Initialize Office JS
+        Office.initialize = function () {
+            console.log('Office.js initialized');
+        };
+    </script>
 </body>
 </html>
