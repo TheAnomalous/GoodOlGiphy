@@ -6,8 +6,76 @@
   <script src="https://appsforoffice.microsoft.com/lib/1.1/hosted/office.js"></script>
   <title>Giphy GIF Inserter</title>
   <style>
-    /* ... (rest of your CSS) */
+    body {
+      font-family: Arial, sans-serif;
+      padding: 10px;
+      background-color: #f4f4f9;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    #searchForm {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    #searchInput {
+      padding: 10px;
+      width: 80%;
+      max-width: 400px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    #searchButton {
+      padding: 10px 20px;
+      background-color: #0078D4;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #searchButton:hover {
+      background-color: #005A9E;
+    }
+    #gifResults {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      grid-gap: 10px;
+    }
+    .gifItem {
+      text-align: center;
+      cursor: pointer;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      padding: 5px;
+      background-color: white;
+    }
+    .gifItem img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 5px;
+    }
+    #pagination {
+      display: flex;
+      justify-content: center;
+      margin-top: 10px;
+      margin-bottom: 20px;
+    }
+    #pagination button {
+      padding: 5px 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      margin: 5px;
+      cursor: pointer;
+      position: relative;
+      top: -10px; /* Adjust this value to control overlap */
+    }
+    #nextPageButton {
+      text-align: center;
+      margin-top: 10px;
+    }
   </style>
+  <script src="https://appsforoffice.microsoft.com/lib/1.1/hosted/office.js"></script>
 </head>
 <body>
   <h1>Giphy GIF Inserter</h1>
